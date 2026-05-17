@@ -115,3 +115,17 @@ export const categoriesQuery = `
   }
 }
 `;
+
+
+
+// GET ALL TESTIMONIALS
+export const testimonialsQuery = `
+*[_type == "testimonial"] | order(order asc) {
+  _id,
+  name,
+  initials,
+  handle,
+  rating,
+  text
+}
+`;

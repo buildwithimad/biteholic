@@ -17,8 +17,8 @@ const content = {
   },
   ar: {
     badge: "الأكثر طلباً",
-    title1: "Featured", 
-    title2: "Burgers",  
+    title1: "مميز", 
+    title2: "البرغر",  
     desc: "برجر فاخر بمكونات مختارة بعناية",
     orderBtn: "اطلب الآن",
     exploreBtn: "عرض القائمة كاملة",
