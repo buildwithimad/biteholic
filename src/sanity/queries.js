@@ -99,3 +99,19 @@ export const productBySlugQuery = `
   }
 }
 `;
+
+
+// GET ALL CATEGORIES
+export const categoriesQuery = `
+*[_type == "category"] | order(order asc) {
+  _id, 
+  name, 
+  "slug": slug.current, 
+  image{
+    ..., 
+    asset->{
+      url
+    }
+  }
+}
+`;

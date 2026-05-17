@@ -11,7 +11,8 @@ export default {
     {
       name: "slug",
       type: "slug",
-      options: { source: "name.en", maxLength: 96 }
+      options: { source: "name.en", maxLength: 96 },
+      validation: Rule => Rule.required()
     },
     {
       name: "image",
@@ -20,7 +21,9 @@ export default {
     },
     {
       name: "order",
-      type: "number"
+      type: "number",
+      title: "Display Order",
+      description: "Used to sort categories (e.g., 1 for Burgers, 2 for Sides)"
     }
   ]
 };

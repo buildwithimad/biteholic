@@ -34,7 +34,7 @@ export default function FeaturedBurgers({ lang = "en", products = [] }) {
   const displayProducts = products.slice(0, 4);
 
   return (
-    <section className="relative w-full bg-black overflow-hidden selection:bg-[#E88C15] selection:text-white">
+    <section className="relative w-full overflow-hidden  selection:text-white">
       
       <div className="max-w-[85rem] mx-auto px-4 sm:px-6 relative z-10 py-16 lg:py-24">
         

@@ -1,19 +1,28 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import { notFound } from "next/navigation";
+import { Roboto, Montserrat, Cairo } from "next/font/google";import { notFound } from "next/navigation";
 import "../globals.css"; // Note the "../" because we are inside the [lang] folder now
 import SmoothScroll from "@/components/animation/SmoothScroll";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
+import { Suspense } from "react";
 
-// Font setup
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+
+
+const roboto = Roboto({
+  variable: "--font-roboto",
   subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
+  weight: ["600", "700"],
+});
+
+const cairo = Cairo({
+  variable: "--font-cairo",
+  subsets: ["arabic"],
+  weight: ["400", "600", "700"],
 });
 
 // Define valid languages
@@ -44,14 +53,21 @@ export default async function RootLayout({ children, params }) {
 
   return (
     <html
-      lang={lang}
-      dir={direction}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+  lang={lang}
+  dir={direction}
+  className={`${roboto.variable} ${montserrat.variable} ${cairo.variable} h-full antialiased`}
+>
       {/* 4. Added your brutalist background and selection colors here to protect the global theme */}
       <body className="min-h-full flex flex-col bg-[#050505] text-white selection:bg-white selection:text-[#E88C15]">
+
+        {/* Dynamic Background Image - Changes on Hover */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] opacity-10 blur-[100px] pointer-events-none transition-all duration-1000">
+        <div className="w-full h-full bg-[#E88C15] rounded-full" />
+      </div>
         
-        <Navbar lang={lang} />
+        <Suspense fallback={null}>
+  <Navbar lang={lang} />
+</Suspense>
 
         <SmoothScroll>
           {children}
