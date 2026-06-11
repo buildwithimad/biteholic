@@ -2,17 +2,13 @@ import { notFound } from "next/navigation";
 
 // Components
 import Hero from "@/components/sections/Hero";
-import FeaturedBurgers from "@/components/sections/FeaturedBurgers";
-import MenuPreview from "@/components/sections/Menu";
-import BestSeller from "@/components/sections/BestSeller";
-import SpecialOfferBanner from "@/components/sections/SpecialOffer";
-import HowItWorks from "@/components/sections/HowItWork";
-import WyChooseUs from "@/components/sections/WhyChooseUs";
-import Testimonials from "@/components/sections/Testimonials"; // Fixed typo from 'Tertimonials'
+
 
 // Services
 import { getHomeProducts } from "@/services/productServices";
 import { getTestimonials } from "@/services/testimonialServices";
+import MapSection from "@/components/sections/MapSection";
+import ContactSection from "@/components/sections/ContactSection";
 
 const validLocales = ["en", "ar"];
 
@@ -46,19 +42,9 @@ export default async function Home({ params }) {
       
       <Hero lang={lang} />
       
-      <FeaturedBurgers lang={lang} products={featured} />
-      
-      <MenuPreview lang={lang} products={menuPreview} />
-      
-      <BestSeller lang={lang} products={bestSellers} />
-      
-      <SpecialOfferBanner lang={lang} offerProducts={specialOffers} />
-      
-      <HowItWorks lang={lang} />
-      
-      <WyChooseUs lang={lang} />
-      
-      <Testimonials lang={lang} testimonials={testimonials} />
+      <MapSection/>
+
+      <ContactSection lang={lang}/>
       
     </main>
   );

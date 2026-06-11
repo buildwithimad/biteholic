@@ -11,7 +11,7 @@ const uiText = {
     orderBtn: "Order via WhatsApp",
     discountLabel: "Save",
     skuLabel: "SKU",
-    urgency: "Only a few left!",
+    urgency: "Only a few left",
     quantity: "Quantity",
     delivery: "Nationwide delivery available",
     details: "Details & Features",
@@ -22,7 +22,7 @@ const uiText = {
     orderBtn: "اطلب عبر واتساب",
     discountLabel: "وفر",
     skuLabel: "رمز المنتج",
-    urgency: "بقي القليل فقط!",
+    urgency: "بقي القليل فقط",
     quantity: "الكمية",
     delivery: "التوصيل متاح لجميع المناطق",
     details: "التفاصيل والمميزات",
@@ -48,11 +48,9 @@ export default function ProductDetail({ lang = "en", product }) {
   const galleryUrls = product?.gallery?.map(img => getImageUrl(img)).filter(Boolean) || [];
   const allImages = Array.from(new Set([mainImgUrl, ...galleryUrls]));
 
-  // Safely initialize the state with the main image
   const [activeImg, setActiveImg] = useState(mainImgUrl);
   const [quantity, setQuantity] = useState(1);
 
-  // FIX: Only depend on the product slug to prevent the infinite re-render loop
   useEffect(() => {
     setActiveImg(mainImgUrl);
   }, [product?.slug, mainImgUrl]);
@@ -67,42 +65,54 @@ export default function ProductDetail({ lang = "en", product }) {
     : 0;
 
   return (
-    <section className="relative w-full min-h-screen bg-[#050505] text-white selection:bg-[#E88C15] selection:text-black font-sans pb-24 lg:pb-0">
-      <div className="max-w-[85rem] mx-auto relative z-20 px-6 py-12 lg:py-24">
-        <div className={`flex flex-col lg:flex-row gap-12 lg:gap-20 ${isAr ? 'lg:flex-row-reverse' : ''}`}>
+    <section 
+      dir={isAr ? "rtl" : "ltr"} 
+      className="relative w-full min-h-screen bg-white text-black font-sans pb-24 pt-32"
+    >
+      <div className="max-w-6xl mx-auto px-6">
+        
+        {/* Breadcrumb / Top Bar (Vercel Style) */}
+        <div className="flex items-center gap-2 text-sm text-gray-500 mb-8 font-medium">
+          <span>{ui.details}</span>
+          <span>/</span>
+          <span className="text-black">{product?.name}</span>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
           
           {/* ========================================= */}
           {/* --- LEFT SIDE: IMAGE GALLERY --- */}
           {/* ========================================= */}
-          <div className="w-full lg:w-1/2 flex flex-col gap-6">
-            <div className="relative w-full aspect-square bg-[#0f0f0f] flex items-center justify-center overflow-hidden border border-white/5 rounded-none">
-              <Animate scale={1} opacity={0} duration={0.6} key={activeImg} className="w-full h-full relative flex items-center justify-center">
-                <div className="absolute inset-0 bg-[#E88C15]/10 blur-[100px] rounded-full scale-100" />
+          <div className="w-full lg:w-1/2 flex flex-col gap-4 lg:sticky lg:top-32">
+            
+            {/* Main Image Stage - Flat, Gray Background, 1px Border */}
+            <div className="relative w-full aspect-square bg-[#fafafa] flex items-center justify-center border border-gray-200 rounded-lg overflow-hidden">
+              <Animate opacity={0} duration={0.4} key={activeImg} className="w-full h-full relative flex items-center justify-center">
                 <Image
                   src={activeImg || "/hero.png"}
                   alt={product?.name || "Product Image"}
                   fill
-                  className="object-contain relative z-10 transform scale-100 lg:scale-105"
+                  className="object-contain p-12 transition-opacity duration-300"
                   priority
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </Animate>
             </div>
 
-            {/* Render thumbnails only if there is more than 1 image */}
+            {/* Thumbnails - Clean Borders */}
             {allImages.length > 1 && (
-              <div className={`flex gap-4 overflow-x-auto no-scrollbar py-2 ${isAr ? 'justify-end' : 'justify-start'}`}>
+              <div className="flex gap-3 overflow-x-auto no-scrollbar justify-start">
                 {allImages.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setActiveImg(img)} 
-                    className={`relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-[#0f0f0f] transition-all duration-300 border rounded-none ${
+                    className={`relative w-20 h-20 flex-shrink-0 bg-[#fafafa] transition-colors duration-200 rounded-md overflow-hidden border ${
                       activeImg === img 
-                        ? "border-[#E88C15] opacity-100" 
-                        : "border-white/5 opacity-50 hover:opacity-100"
+                        ? "border-black" 
+                        : "border-gray-200 hover:border-gray-400"
                     }`}
                   >
-                    <Image src={img} alt={`thumb-${i}`} fill className="object-cover p-1" />
+                    <Image src={img} alt={`thumb-${i}`} fill className="object-contain p-3" />
                   </button>
                 ))}
               </div>
@@ -113,87 +123,121 @@ export default function ProductDetail({ lang = "en", product }) {
           {/* ========================================= */}
           {/* --- RIGHT SIDE: PRODUCT DETAILS --- */}
           {/* ========================================= */}
-          <div className={`w-full lg:w-1/2 flex flex-col pt-4 ${isAr ? 'text-right' : 'text-left'}`}>
+          <div className="w-full lg:w-1/2 flex flex-col text-start">
             
-            {/* Badge */}
-            {product?.badge && (
-              <span className="text-[#E88C15] text-[10px] font-bold uppercase tracking-[0.2em] mb-4 block">
-                {product.badge}
-              </span>
-            )}
+            {/* Category / Badges */}
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
+              {product?.category && (
+                <span className="text-gray-500 text-xs font-semibold uppercase tracking-widest">
+                  {typeof product.category === 'object' ? product.category.name : product.category}
+                </span>
+              )}
+              {product?.badge && (
+                <span className="bg-black text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md">
+                  {product.badge}
+                </span>
+              )}
+            </div>
 
-            {/* Title */}
-            <h1 className="text-4xl sm:text-5xl font-light text-white mb-6 tracking-wide leading-tight">
+            {/* Title - Tight Tracking, Stark Black */}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-black mb-6 leading-tight">
               {product?.name}
             </h1>
 
-            {/* Pricing */}
-            <div className={`flex items-end gap-4 mb-2 ${isAr ? 'flex-row-reverse justify-end' : 'justify-start'}`}>
+            {/* Description */}
+            <p className="text-gray-600 text-base leading-relaxed mb-8 max-w-xl">
+              {product?.description}
+            </p>
+
+            {/* Pricing Area */}
+            <div className="flex items-center gap-4 mb-8 flex-wrap">
               {hasDiscount ? (
                 <>
-                  <span className="text-2xl sm:text-3xl font-medium text-white">{product.discountPrice} <span className="text-sm">{ui.currency}</span></span>
-                  <span className="text-white/40 line-through text-lg font-light mb-1">{product.price} {ui.currency}</span>
-                  <span className="bg-[#E88C15]/10 text-[#E88C15] border border-[#E88C15]/30 px-2 py-1 text-[10px] uppercase tracking-wider mb-1.5 rounded-none">
+                  <span className="text-3xl font-semibold tracking-tight text-black">
+                    {product.discountPrice} <span className="text-sm font-medium text-gray-500 uppercase">{ui.currency}</span>
+                  </span>
+                  <span className="text-gray-400 line-through text-lg">{product.price} {ui.currency}</span>
+                  <span className="bg-gray-100 text-black border border-gray-200 px-2 py-1 text-xs font-semibold uppercase tracking-wide rounded-md">
                     {ui.discountLabel} {discountPercent}%
                   </span>
                 </>
               ) : (
-                <span className="text-2xl sm:text-3xl font-medium text-white">{product?.price} <span className="text-sm">{ui.currency}</span></span>
+                <span className="text-3xl font-semibold tracking-tight text-black">
+                  {product?.price} <span className="text-sm font-medium text-gray-500 uppercase">{ui.currency}</span>
+                </span>
               )}
             </div>
             
             {/* Urgency & SKU */}
-            <span className="text-red-400 text-xs mt-2 mb-8 block font-medium">
-              {ui.urgency} {product?.sku ? `(${ui.skuLabel}: ${product.sku})` : ''}
-            </span>
-
-            {/* Description */}
-            <p className="text-white/60 text-sm sm:text-base font-light leading-relaxed mb-10 max-w-xl">
-              {product?.description}
-            </p>
+            {(product?.sku || ui.urgency) && (
+              <div className="flex items-center gap-3 mb-8 pb-8 border-b border-gray-200 text-sm">
+                <span className="text-black font-medium flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-black animate-pulse" />
+                  {ui.urgency}
+                </span>
+                {product?.sku && (
+                  <>
+                    <span className="text-gray-300">|</span>
+                    <span className="text-gray-500 font-mono">
+                      {ui.skuLabel}: {product.sku}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Quantity Selector */}
-            <div className={`flex items-center gap-6 mb-8 ${isAr ? 'flex-row-reverse' : ''}`}>
-              <span className="text-[10px] text-white/50 uppercase tracking-[0.2em]">{ui.quantity}</span>
-              <div className={`flex items-center border border-white/20 rounded-none ${isAr ? 'flex-row-reverse' : ''}`}>
-                <button onClick={decreaseQty} className="w-10 h-10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/5 transition-colors rounded-none">
-                  -
+            <div className="flex items-center gap-6 mb-8">
+              <span className="text-sm text-black font-medium">{ui.quantity}</span>
+              <div className="flex items-center border border-gray-200 rounded-md overflow-hidden bg-white">
+                <button onClick={decreaseQty} className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors font-medium">
+                  −
                 </button>
-                <span className="w-10 text-center text-sm font-medium text-white">{quantity}</span>
-                <button onClick={increaseQty} className="w-10 h-10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/5 transition-colors rounded-none">
+                <span className="w-12 text-center text-sm font-medium text-black border-x border-gray-200 py-2">{quantity}</span>
+                <button onClick={increaseQty} className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors font-medium">
                   +
                 </button>
               </div>
             </div>
 
-            {/* WhatsApp Order Button */}
-            <WhatsAppOrderButton 
-              product={product} 
-              quantity={quantity} 
-              lang={lang} 
-              label={ui.orderBtn} 
-            />
+            {/* WhatsApp Order Button Wrapper */}
+            <div className="w-full max-w-md mb-8">
+              <WhatsAppOrderButton 
+                product={product} 
+                quantity={quantity} 
+                lang={lang} 
+                label={ui.orderBtn} 
+              />
+            </div>
             
-            <p className="text-center text-white/40 text-[10px] uppercase tracking-wider mb-12">
+            {/* Delivery Info */}
+            <div className="flex items-center gap-2 text-gray-500 text-sm mb-12 font-medium">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+              </svg>
               {ui.delivery}
-            </p>
+            </div>
 
-            {/* Accordions */}
-            <div className="border-t border-white/10 rounded-none">
+            {/* Accordions (Clean Vercel Style) */}
+            <div className="border-t border-gray-200">
               
               {/* Details & Features */}
               {product?.specs?.length > 0 && (
-                <details className="group border-b border-white/10 rounded-none" open>
-                  <summary className={`flex items-center justify-between py-5 cursor-pointer list-none ${isAr ? 'flex-row-reverse' : ''}`}>
-                    <span className="text-xs uppercase tracking-widest text-white/80 group-open:text-white group-open:font-medium">{ui.details}</span>
-                    <span className="text-white/40 group-open:rotate-45 transition-transform duration-300">+</span>
+                <details className="group border-b border-gray-200" open>
+                  <summary className="flex items-center justify-between py-4 cursor-pointer list-none select-none">
+                    <span className="text-sm font-medium text-black">{ui.details}</span>
+                    <span className="text-gray-400 group-open:rotate-45 transition-transform duration-200">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </span>
                   </summary>
-                  <div className="pb-6 pt-2 animate-fade-in rounded-none">
+                  <div className="pb-6 pt-1 text-sm text-gray-600">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                       {product.specs.map((spec, i) => (
-                        <div key={i} className={`flex flex-col ${isAr ? 'items-end' : 'items-start'}`}>
-                          <span className="text-white/40 text-[10px] uppercase tracking-widest mb-1">{spec.label}</span>
-                          <span className="text-white/90 text-sm">{spec.value}</span>
+                        <div key={i} className="flex flex-col items-start border-l-2 border-gray-200 pl-3 rtl:pl-0 rtl:pr-3 rtl:border-l-0 rtl:border-r-2">
+                          <span className="text-xs text-gray-400 uppercase tracking-widest mb-0.5">{spec.label}</span>
+                          <span className="text-black font-medium">{spec.value}</span>
                         </div>
                       ))}
                     </div>
@@ -203,17 +247,21 @@ export default function ProductDetail({ lang = "en", product }) {
 
               {/* Nutritional Info */}
               {product?.nutrition?.length > 0 && (
-                <details className="group border-b border-white/10 rounded-none">
-                  <summary className={`flex items-center justify-between py-5 cursor-pointer list-none ${isAr ? 'flex-row-reverse' : ''}`}>
-                    <span className="text-xs uppercase tracking-widest text-white/80 group-open:text-white group-open:font-medium">{ui.nutritionTitle}</span>
-                    <span className="text-white/40 group-open:rotate-45 transition-transform duration-300">+</span>
+                <details className="group border-b border-gray-200">
+                  <summary className="flex items-center justify-between py-4 cursor-pointer list-none select-none">
+                    <span className="text-sm font-medium text-black">{ui.nutritionTitle}</span>
+                    <span className="text-gray-400 group-open:rotate-45 transition-transform duration-200">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </span>
                   </summary>
-                  <div className="pb-6 pt-2 animate-fade-in rounded-none">
-                    <div className="grid grid-cols-3 gap-4">
+                  <div className="pb-6 pt-1 text-sm text-gray-600">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       {product.nutrition.map((n, i) => (
-                        <div key={i} className={`flex flex-col ${isAr ? 'items-end' : 'items-start'}`}>
-                          <span className="text-white/40 text-[10px] uppercase tracking-widest mb-1">{n.label}</span>
-                          <span className="text-white/90 text-sm">{n.value}</span>
+                        <div key={i} className="flex flex-col items-start border border-gray-200 p-3 rounded-md bg-[#fafafa]">
+                          <span className="text-xs text-gray-500 uppercase tracking-wider mb-1">{n.label}</span>
+                          <span className="text-black font-mono font-medium">{n.value}</span>
                         </div>
                       ))}
                     </div>
@@ -228,13 +276,11 @@ export default function ProductDetail({ lang = "en", product }) {
         </div>
       </div>
       
-      {/* Styles for hidden scrollbars and animations */}
+      {/* Styles for hidden scrollbars */}
       <style dangerouslySetInnerHTML={{__html: `
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         details > summary::-webkit-details-marker { display: none; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
       `}} />
     </section>
   );

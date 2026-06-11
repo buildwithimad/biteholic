@@ -1,53 +1,95 @@
 @import "tailwindcss";
 
+/* =======================================================
+   Theme
+======================================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #050505;
+  --foreground: #ffffff;
+
+  --font-heading: var(--font-montserrat);
+  --font-body: var(--font-ibm-plex-sans);
+  --font-arabic: var(--font-cairo);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --font-sans: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =======================================================
+   Base
+======================================================= */
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  font-family: var(--font-roboto);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-ibm-plex-sans);
 }
 
+/* =======================================================
+   English Headings
+======================================================= */
 
-
-:root {
-  --font-heading: var(--font-montserrat);
-  --font-body: var(--font-roboto);
-  --font-arabic: var(--font-cairo);
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-montserrat);
 }
 
-/* English default */
-body {
-  font-family: var(--font-body);
-}
+/* =======================================================
+   Arabic Override
+======================================================= */
 
-/* Headings */
-h1, h2, h3, h4 {
-  font-family: var(--font-heading);
-}
-
-/* Arabic override */
 html[lang="ar"] body {
-  font-family: var(--font-arabic);
+  font-family: var(--font-cairo);
 }
 
 html[lang="ar"] h1,
 html[lang="ar"] h2,
-html[lang="ar"] h3 {
-  font-family: var(--font-arabic);
+html[lang="ar"] h3,
+html[lang="ar"] h4,
+html[lang="ar"] h5,
+html[lang="ar"] h6 {
+  font-family: var(--font-cairo);
+}
+
+/* =======================================================
+   Selection
+======================================================= */
+
+::selection {
+  background: #e88c15;
+  color: white;
+}
+
+/* =======================================================
+   Scrollbar
+======================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e88c15;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff9f1c;
 }
