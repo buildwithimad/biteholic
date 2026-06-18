@@ -7,7 +7,6 @@ import MapSection from "@/components/sections/MapSection";
 import ContactSection from "@/components/sections/ContactSection";
 
 // Services
-import { getTestimonials } from "@/services/testimonialServices";
 import { getProducts } from "@/services/productServices";
 
 const validLocales = ["en", "ar"];
