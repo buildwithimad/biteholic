@@ -22,15 +22,16 @@ export default function MapSection() {
       {/* Map Background Placeholder */}
       {/* Note: For a fully interactive map, you can replace this iframe with 'react-google-maps/api' 
           and pass the SVG below into your Marker's icon prop. */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <iframe
-          title="BiteHolic Riyadh Map"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d463877.31243208534!2d46.49286820542152!3d24.72545537233718!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e2f03890d489399%3A0xba974d1c98e79fd5!2sRiyadh%20Saudi%20Arabia!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus"
-          className="w-full h-full border-0"
-          style={{ filter: "opacity(0.85) contrast(1.1) brightness(1.05)" }}
-          loading="lazy"
-        />
-      </div>
+      <div className="absolute inset-0 z-0">
+  <iframe
+    title="BiteHolic Location"
+    src="https://maps.google.com/maps?q=BiteHolic%20%D9%85%D8%B7%D8%B9%D9%85%20%D8%B9%D8%B6%D8%A9%20%D8%A7%D9%84%D8%B4%D8%BA%D9%81%20Riyadh&z=16&output=embed"
+    className="w-full h-full border-0"
+    loading="lazy"
+    allowFullScreen
+    referrerPolicy="no-referrer-when-downgrade"
+  />
+</div>
 
       {/* Floating Markers Overlay */}
       <div className="absolute inset-0 z-10 w-full relative pointer-events-none">

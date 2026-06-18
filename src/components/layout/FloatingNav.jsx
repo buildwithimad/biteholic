@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Clean Outline Icons
@@ -15,6 +15,12 @@ const HomeIcon = () => (
 const MenuIcon = () => (
   <svg className="w-[18px] h-[18px] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+);
+
+const GlobeIcon = () => (
+  <svg className="w-[18px] h-[18px] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
@@ -33,9 +39,17 @@ const navContent = {
 export default function FloatingNav({ lang = "en" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
   const isAr = lang === "ar";
   const links = navContent[lang] || navContent.en;
+  
+  // Language Switcher Setup
+  const targetLang = isAr ? "en" : "ar";
+  const switchLangText = isAr ? "EN" : "عربي";
 
   // Clear the full-screen loading state automatically when the route officially changes
   useEffect(() => {
@@ -50,9 +64,35 @@ export default function FloatingNav({ lang = "en" }) {
     }
   };
 
+  // Bulletproof Language Switching Logic
+  const handleLanguageSwitch = () => {
+    if (!pathname) return;
+    
+    setIsOpen(false);
+    setIsNavigating(true); // Show loader during language switch
+
+    // 1. Swap the language segment
+    const segments = pathname.split("/");
+    segments[1] = targetLang; 
+    let newUrl = segments.join("/");
+
+    // 2. Preserve any query parameters
+    const currentSearchParams = searchParams.toString();
+    if (currentSearchParams) {
+      newUrl += `?${currentSearchParams}`;
+    }
+
+    // 3. Preserve any section hashes
+    if (typeof window !== "undefined" && window.location.hash) {
+      newUrl += window.location.hash;
+    }
+
+    router.push(newUrl);
+  };
+
   return (
     <>
-      {/* --- FULL SCREEN LOADING OVERLAY (Strict Vercel-Style: No blurs, solid color) --- */}
+      {/* --- FULL SCREEN LOADING OVERLAY --- */}
       <AnimatePresence>
         {isNavigating && (
           <motion.div 
@@ -110,6 +150,22 @@ export default function FloatingNav({ lang = "en" }) {
                   </Link>
                 );
               })}
+
+              {/* --- VERTICAL DIVIDER --- */}
+              <div className="w-[1px] h-6 bg-white/10 mx-1" />
+
+              {/* --- LANGUAGE SWITCHER BUTTON --- */}
+              <button
+                onClick={handleLanguageSwitch}
+                className="flex items-center justify-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full bg-transparent text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#E88D15] whitespace-nowrap"
+              >
+                <div className="flex-shrink-0 text-gray-400">
+                  <GlobeIcon />
+                </div>
+                <span className="text-[12px] sm:text-sm font-medium uppercase tracking-widest hidden sm:block pt-0.5">
+                  {switchLangText}
+                </span>
+              </button>
             </motion.nav>
           )}
         </AnimatePresence>
