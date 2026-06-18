@@ -5,7 +5,7 @@ export default function WhatsAppOrderButton({
   quantity = 1, 
   lang = "en",
   label = "Order via WhatsApp",
-  phoneNumber = "966500000000" // Replace with your actual number
+  phoneNumber = "966530711252" // Replace with your actual number
 }) {
   // 1. Get the correct price (use discount price if it's on sale)
   const currentPrice = (product?.isOnSale && product?.discountPrice) 
