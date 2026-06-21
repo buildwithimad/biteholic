@@ -80,7 +80,7 @@ export default function AboutClient({ lang = "en" }) {
           </span>
         </Animate>
         <Animate y={20} opacity={0} delay={0.1}>
-          <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black tracking-tight leading-[1.1] mb-6 text-gray-900">
+          <h1 className="text-4xl sm:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] mb-6 text-gray-900">
             {ui.title.split(" ").map((word, i) => (
               <span key={i} className={i === ui.title.split(" ").length - 1 ? "text-[#E88D15]" : "text-gray-900"}>
                 {word}{" "}
@@ -105,7 +105,7 @@ export default function AboutClient({ lang = "en" }) {
               {/* Note: Provide an actual image path from your public folder */}
               <div className="relative w-full h-full rounded-3xl overflow-hidden bg-gray-200">
                 <Image 
-                  src="/hero.png" // Replace with your about image
+                  src="/abouthero.webp" // Replace with your about image
                   alt="Biteholic Kitchen" 
                   fill 
                   className="object-cover hover:scale-105 transition-transform duration-700 ease-out"
@@ -118,7 +118,7 @@ export default function AboutClient({ lang = "en" }) {
           {/* Right: Story Text & Stats */}
           <div className="w-full lg:w-1/2 flex flex-col justify-center order-1 lg:order-none text-start">
             <Animate y={20} opacity={0} delay={0.4}>
-              <h3 className="text-3xl lg:text-5xl font-extrabold tracking-tight mb-8 text-gray-900">
+              <h3 className="text-3xl lg:text-5xl font-semibold tracking-tight mb-8 text-gray-900">
                 {ui.storyTitle}
               </h3>
               <div className="space-y-6 text-gray-600 font-medium leading-relaxed mb-12">
