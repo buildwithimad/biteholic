@@ -8,7 +8,7 @@ export async function POST(req) {
 
     const data = await resend.emails.send({
       from: "BiteHolic <contact@biteholic.com>", // Make sure this domain is verified in Resend
-      to: ["imaddeveloper0@gmail.com"],
+      to: ["umarashraf0807@gmail.com"],
       replyTo: email,
       subject: `New ${inquiryType} from ${name}`,
      html: `
