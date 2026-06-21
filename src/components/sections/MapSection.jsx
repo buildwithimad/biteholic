@@ -75,7 +75,7 @@ export default function MapSection() {
       {/* OPTIMIZATION: Next.js Image component replaces the heavy Google Maps iframe */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/biteholicmap.webp"
+          src="/biteholicMap.webp"
           alt="BiteHolic Riyadh Locations Map"
           fill
           quality={85}
