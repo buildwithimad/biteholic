@@ -13,7 +13,7 @@ const uiText = {
     skuLabel: "SKU",
     urgency: "Only a few left",
     quantity: "Quantity",
-    delivery: "Nationwide delivery available",
+    delivery: "Delivery in Daharat laban only",
     details: "Details & Features",
     nutritionTitle: "Nutritional Info",
     currency: "SAR"
@@ -24,7 +24,7 @@ const uiText = {
     skuLabel: "رمز المنتج",
     urgency: "بقي القليل فقط",
     quantity: "الكمية",
-    delivery: "التوصيل متاح لجميع المناطق",
+    delivery: "التوصيل في ضهارات لبن فقط",
     details: "التفاصيل والمميزات",
     nutritionTitle: "المعلومات الغذائية",
     currency: "ريال"

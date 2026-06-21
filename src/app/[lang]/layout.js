@@ -10,6 +10,7 @@ import SmoothScroll from "@/components/animation/SmoothScroll";
 import Footer from "@/components/layout/Footer";
 import { Suspense } from "react";
 import FloatingNav from "@/components/layout/FloatingNav";
+import CursorProvider from "@/components/ui/CursorProvider";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -31,11 +32,6 @@ const cairo = Cairo({
 
 const validLocales = ["en", "ar"];
 
-export const metadata = {
-  title: "BiteHolic | Premium Gourmet Burgers",
-  description:
-    "Experience the pinnacle of gourmet burgers crafted with premium ingredients.",
-};
 
 export async function generateStaticParams() {
   return validLocales.map((lang) => ({ lang }));
@@ -72,6 +68,7 @@ export default async function LangLayout({ children, params }) {
           </Suspense>
 
           <SmoothScroll>
+            <CursorProvider/>
             {children}
           </SmoothScroll>
 

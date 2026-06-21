@@ -67,26 +67,29 @@ export default function AboutClient({ lang = "en" }) {
   const isAr = lang === "ar";
 
   return (
-    <section className="w-full bg-[#050505] text-white pt-32 pb-24 lg:pt-40 lg:pb-32 selection:bg-[#E88C15] selection:text-black overflow-hidden">
+    <section 
+      dir={isAr ? "rtl" : "ltr"} 
+      className="w-full bg-[#fcf9f0] text-gray-900 pt-32 pb-24 lg:pt-40 lg:pb-32 selection:bg-[#E88D15] selection:text-white overflow-hidden"
+    >
       
       {/* --- HERO HEADER --- */}
       <div className="max-w-[90rem] mx-auto px-6 relative z-10 text-start mb-16 lg:mb-24">
         <Animate y={20} opacity={0}>
-          <span className="bg-[#E88C15] text-black font-black tracking-[0.3em] uppercase text-[10px] px-3 py-1 mb-6 inline-block rounded-none">
+          <span className="bg-[#E88D15] text-white font-bold tracking-widest uppercase text-xs px-4 py-1.5 mb-6 inline-block rounded-full">
             {ui.badge}
           </span>
         </Animate>
         <Animate y={20} opacity={0} delay={0.1}>
-          <h1 className="text-5xl sm:text-7xl lg:text-9xl font-black tracking-tighter uppercase leading-[0.85] mb-6">
+          <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black tracking-tight leading-[1.1] mb-6 text-gray-900">
             {ui.title.split(" ").map((word, i) => (
-              <span key={i} className={i === ui.title.split(" ").length - 1 ? "text-[#E88C15]" : "text-white"}>
+              <span key={i} className={i === ui.title.split(" ").length - 1 ? "text-[#E88D15]" : "text-gray-900"}>
                 {word}{" "}
               </span>
             ))}
           </h1>
         </Animate>
         <Animate y={20} opacity={0} delay={0.2}>
-          <p className="text-gray-400 text-lg lg:text-2xl font-light max-w-2xl leading-relaxed">
+          <p className="text-gray-600 text-lg lg:text-2xl font-medium max-w-2xl leading-relaxed">
             {ui.subtitle}
           </p>
         </Animate>
@@ -96,41 +99,41 @@ export default function AboutClient({ lang = "en" }) {
       <div className="max-w-[90rem] mx-auto px-6 mb-24 lg:mb-32">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-stretch">
           
-          {/* Left: Large Sharp Image */}
+          {/* Left: Soft Rounded Image (Flat) */}
           <div className="w-full lg:w-1/2 h-[400px] lg:h-auto min-h-[500px] relative order-2 lg:order-none">
             <Animate y={30} opacity={0} delay={0.3} className="w-full h-full relative">
               {/* Note: Provide an actual image path from your public folder */}
-              <Image 
-                src="/hero.png" 
-                alt="Biteholic Kitchen" 
-                fill 
-                className="object-cover grayscale hover:grayscale-0 transition-all duration-700 rounded-none border border-white/5"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-              {/* Decorative Corner Accent */}
-              <div className={`absolute top-0 ${isAr ? 'right-0 border-l-2' : 'left-0 border-r-2'} w-16 h-16 border-b-2 border-[#E88C15]`} />
+              <div className="relative w-full h-full rounded-3xl overflow-hidden bg-gray-200">
+                <Image 
+                  src="/hero.png" // Replace with your about image
+                  alt="Biteholic Kitchen" 
+                  fill 
+                  className="object-cover hover:scale-105 transition-transform duration-700 ease-out"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
             </Animate>
           </div>
 
           {/* Right: Story Text & Stats */}
           <div className="w-full lg:w-1/2 flex flex-col justify-center order-1 lg:order-none text-start">
             <Animate y={20} opacity={0} delay={0.4}>
-              <h3 className="text-3xl lg:text-5xl font-black uppercase tracking-tight mb-8">
+              <h3 className="text-3xl lg:text-5xl font-extrabold tracking-tight mb-8 text-gray-900">
                 {ui.storyTitle}
               </h3>
-              <div className="space-y-6 text-gray-400 font-light leading-relaxed mb-12">
+              <div className="space-y-6 text-gray-600 font-medium leading-relaxed mb-12">
                 <p>{ui.storyText1}</p>
                 <p>{ui.storyText2}</p>
               </div>
             </Animate>
 
-            {/* Stats Grid */}
+            {/* Clean Stats Grid */}
             <Animate y={20} opacity={0} delay={0.5}>
-              <div className="grid grid-cols-3 gap-6 pt-10 border-t border-white/10">
+              <div className="grid grid-cols-3 gap-6 pt-10 border-t border-gray-200">
                 {ui.stats.map((stat, i) => (
                   <div key={i} className="flex flex-col text-start">
-                    <span className="text-3xl md:text-5xl font-black text-[#E88C15] mb-2">{stat.number}</span>
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-gray-500">{stat.label}</span>
+                    <span className="text-3xl md:text-5xl font-black text-[#E88D15] mb-2">{stat.number}</span>
+                    <span className="text-[10px] md:text-xs uppercase tracking-widest font-bold text-gray-400">{stat.label}</span>
                   </div>
                 ))}
               </div>
@@ -140,25 +143,26 @@ export default function AboutClient({ lang = "en" }) {
         </div>
       </div>
 
-      {/* --- VALUES GRID --- */}
+      {/* --- CLEAN VALUES GRID (Flat Cards) --- */}
       <div className="max-w-[90rem] mx-auto px-6">
         <Animate y={20} opacity={0} delay={0.2}>
-          <h3 className="text-xs font-black text-[#E88C15] uppercase tracking-[0.4em] mb-12 flex items-center gap-4 text-start">
-            <span className="w-12 h-[2px] bg-[#E88C15]" /> {ui.valuesTitle}
+          <h3 className="text-xs font-bold text-[#E88D15] uppercase tracking-widest mb-12 flex items-center gap-4 text-start">
+            <span className="w-12 h-[2px] bg-[#E88D15] rounded-full" /> {ui.valuesTitle}
           </h3>
         </Animate>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {ui.values.map((value, i) => (
             <Animate key={i} y={30} opacity={0} delay={0.3 + i * 0.1}>
-              <div className="flex flex-col p-8 lg:p-12 bg-[#111] border border-white/5 rounded-none hover:bg-[#1a1a1a] hover:border-white/10 transition-colors duration-300 h-full text-start group">
-                <span className="text-5xl font-black text-white/5 group-hover:text-[#E88C15]/20 transition-colors mb-6 font-serif">
+              {/* Flat White Cards, No Borders, No Shadows */}
+              <div className="flex flex-col p-8 lg:p-10 bg-white rounded-3xl h-full text-start group hover:-translate-y-1 transition-transform duration-300">
+                <span className="text-5xl font-black text-gray-100 group-hover:text-[#E88D15]/20 transition-colors mb-6 font-serif">
                   0{i + 1}
                 </span>
-                <h4 className="text-xl lg:text-2xl font-black uppercase tracking-tight text-white mb-4">
+                <h4 className="text-xl lg:text-2xl font-bold tracking-tight text-gray-900 mb-4">
                   {value.title}
                 </h4>
-                <p className="text-sm text-gray-400 font-light leading-relaxed">
+                <p className="text-sm text-gray-500 font-medium leading-relaxed">
                   {value.desc}
                 </p>
               </div>

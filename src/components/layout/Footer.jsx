@@ -23,7 +23,7 @@ export default function Footer({ lang = "en" }) {
   return (
     <footer 
       dir={isAr ? "rtl" : "ltr"} 
-      className="w-full bg-[#e3e3e3] text-[#222222] pt-16 pb-8 px-6 shadow-md border-t border-[#e88d15]/20 selection:bg-[#e3e3e3] selection:text-white"
+      className="w-full bg-[#121212] text-[#222222] pt-16 pb-8 px-6 shadow-md border-t border-[#e88d15]/20 selection:bg-[#e3e3e3] selection:text-white"
     >
       <div className="w-full max-w-[1200px] mx-auto flex flex-col items-center">
         

@@ -71,6 +71,20 @@ export async function getProductBySlug(slug, lang = "en") {
     badge: getLocalizedText(item.badge, lang),
     whatsappMessage: getLocalizedText(item.whatsappMessage, lang),
 
+    seo: item.seo
+  ? {
+      metaTitle: getLocalizedText(
+        item.seo.metaTitle,
+        lang
+      ),
+      metaDescription: getLocalizedText(
+        item.seo.metaDescription,
+        lang
+      ),
+      keywords: item.seo.keywords || [],
+    }
+  : null,
+
     specs: item.specs?.map(s => ({
       label: getLocalizedText(s.label, lang),
       value: getLocalizedText(s.value, lang),

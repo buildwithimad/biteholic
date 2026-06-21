@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 // Unified Multi-language Content Dictionary
 const content = {
@@ -42,7 +43,7 @@ const content = {
         {
           id: "hours",
           title: "Open & Closing",
-          desc: "Sat - Fri: 05:00AM\nto 03:30AM",
+          desc: "Daily: 01:00PM\nto 04:00AM",
           icon: (
             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -58,11 +59,13 @@ const content = {
         name: { label: "Your Name", placeholder: "John Doe" },
         email: { label: "Your Email", placeholder: "email@example.com" },
         phone: { label: "Your Number", placeholder: "+966 5x xxx xxxx" },
-        company: { label: "Company Name", placeholder: "BiteHolic (Optional)" },
         type: { label: "Contact Type", placeholder: "Select Inquiry Type" },
         message: { label: "Message", placeholder: "Hi, I would like to talk about..." }
       },
       button: "Send Message",
+      loading: "Sending...",
+      success: "Message sent successfully! We will get back to you soon.",
+      error: "Something went wrong. Please try again.",
       options: ["General Inquiry", "Feedback", "Careers", "Franchise"]
     }
   },
@@ -120,38 +123,102 @@ const content = {
         name: { label: "الاسم", placeholder: "الاسم الكريم" },
         email: { label: "البريد الإلكتروني", placeholder: "email@example.com" },
         phone: { label: "رقم الهاتف", placeholder: "+966 5x xxx xxxx" },
-        company: { label: "اسم الشركة", placeholder: "بايت هوليك (اختياري)" },
         type: { label: "نوع التواصل", placeholder: "اختر نوع الاستفسار" },
         message: { label: "الرسالة", placeholder: "مرحباً، أود التحدث حول..." }
       },
       button: "إرسال الرسالة",
+      loading: "جاري الإرسال...",
+      success: "تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.",
+      error: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
       options: ["استفسار عام", "ملاحظات", "وظائف", "الامتياز التجاري"]
     }
   }
 };
 
+// FIX: Define InputWrapper OUTSIDE the main component so it doesn't get unmounted on every keystroke
+const InputWrapper = ({ label, icon, isAr, children }) => (
+  <div className="flex flex-col w-full mb-8 group">
+    <label className="text-gray-500 text-sm font-medium mb-2 px-1 group-focus-within:text-[#E88D15] transition-colors duration-300">
+      {label}
+    </label>
+    <div className="relative flex items-center border-b border-gray-200 focus-within:border-[#E88D15] transition-all duration-300 pb-3">
+      {icon && (
+        <div className={`text-gray-400 group-focus-within:text-[#E88D15] transition-colors duration-300 ${isAr ? "ml-3" : "mr-3"}`}>
+          {icon}
+        </div>
+      )}
+      <div className="w-full flex-1">
+        {children}
+      </div>
+    </div>
+  </div>
+);
+
 export default function ContactUnified({ lang = "en" }) {
   const t = content[lang] || content.en;
   const isAr = lang === "ar";
 
-  // Reusable Input Wrapper with interactive focus states
-  const InputWrapper = ({ label, icon, children }) => (
-    <div className="flex flex-col w-full mb-8 group">
-      <label className="text-gray-500 text-sm font-medium mb-2 px-1 group-focus-within:text-[#E88D15] transition-colors duration-300">
-        {label}
-      </label>
-      <div className="relative flex items-center border-b border-gray-200 focus-within:border-[#E88D15] transition-all duration-300 pb-3">
-        {icon && (
-          <div className={`text-gray-400 group-focus-within:text-[#E88D15] transition-colors duration-300 ${isAr ? "ml-3" : "mr-3"}`}>
-            {icon}
-          </div>
-        )}
-        <div className="w-full flex-1">
-          {children}
-        </div>
-      </div>
-    </div>
-  );
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    inquiryType: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSuccess(false);
+    setError(false);
+
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setSuccess(true);
+        // Reset form on success
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          inquiryType: "",
+          message: "",
+        });
+        
+        // Hide success message after 5 seconds
+        setTimeout(() => setSuccess(false), 5000);
+      } else {
+        setError(true);
+      }
+    } catch (error) {
+      console.log(error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   return (
     <section 
@@ -159,7 +226,6 @@ export default function ContactUnified({ lang = "en" }) {
       className="relative w-full pt-20 pb-24 bg-white overflow-hidden font-sans text-[#333333] selection:bg-[#E88D15] selection:text-white"
     >
       {/* --- SEAMLESS BACKGROUND SHAPE --- */}
-      {/* This gray block starts behind the contact cards and wraps all the way down around the form */}
       <div className="absolute top-[280px] lg:top-[220px] left-1/2 -translate-x-1/2 w-[96%] max-w-[1400px] h-[calc(100%-200px)] bg-[#fafafa] rounded-t-[40px] z-0 pointer-events-none border border-gray-100/50 shadow-inner" />
 
       <div className="relative z-10 w-full max-w-[1200px] mx-auto px-6">
@@ -201,7 +267,7 @@ export default function ContactUnified({ lang = "en" }) {
 
               {/* Card Body */}
               <div className="relative w-full h-full bg-white rounded-2xl shadow-[0_15px_40px_-10px_rgba(0,0,0,0.06)] overflow-hidden border border-gray-50">
-                {/* Hover Animation Layer: Orange circle expanding from bottom-right */}
+                {/* Hover Animation Layer */}
                 <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-[#E88D15] rounded-full transform scale-0 group-hover:scale-[30] transition-transform duration-700 ease-in-out origin-center z-0" />
 
                 {/* Card Content */}
@@ -255,7 +321,7 @@ export default function ContactUnified({ lang = "en" }) {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="bg-white rounded-[2rem] shadow-[0_15px_60px_rgba(0,0,0,0.04)] p-8 md:p-12 border border-gray-100"
           >
-            <form className="w-full flex flex-col" onSubmit={(e) => e.preventDefault()}>
+            <form className="w-full flex flex-col" onSubmit={handleSubmit}>
               
               {/* Top 4 Fields - 2 Column Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 lg:gap-x-16">
@@ -263,6 +329,7 @@ export default function ContactUnified({ lang = "en" }) {
                 {/* Name */}
                 <InputWrapper 
                   label={t.getInTouch.fields.name.label}
+                  isAr={isAr} // FIX: passed here
                   icon={
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -271,6 +338,10 @@ export default function ContactUnified({ lang = "en" }) {
                 >
                   <input 
                     type="text" 
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
                     placeholder={t.getInTouch.fields.name.placeholder}
                     className="w-full bg-transparent outline-none text-base text-gray-800 placeholder-gray-300"
                   />
@@ -279,6 +350,7 @@ export default function ContactUnified({ lang = "en" }) {
                 {/* Email */}
                 <InputWrapper 
                   label={t.getInTouch.fields.email.label}
+                  isAr={isAr} // FIX: passed here
                   icon={
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -287,6 +359,10 @@ export default function ContactUnified({ lang = "en" }) {
                 >
                   <input 
                     type="email" 
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
                     placeholder={t.getInTouch.fields.email.placeholder}
                     className="w-full bg-transparent outline-none text-base text-gray-800 placeholder-gray-300"
                     dir="ltr"
@@ -296,6 +372,7 @@ export default function ContactUnified({ lang = "en" }) {
                 {/* Phone Number */}
                 <InputWrapper 
                   label={t.getInTouch.fields.phone.label}
+                  isAr={isAr} // FIX: passed here
                   icon={
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -304,52 +381,47 @@ export default function ContactUnified({ lang = "en" }) {
                 >
                   <input 
                     type="tel" 
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={handleChange}
                     placeholder={t.getInTouch.fields.phone.placeholder}
                     className="w-full bg-transparent outline-none text-base text-gray-800 placeholder-gray-300"
                     dir="ltr"
                   />
                 </InputWrapper>
 
-                {/* Company Name */}
-                <InputWrapper 
-                  label={t.getInTouch.fields.company.label}
-                  icon={
+                {/* Contact Type - Full Width Dropdown */}
+                <div className="relative">
+                  <InputWrapper 
+                    label={t.getInTouch.fields.type.label}
+                    isAr={isAr} // FIX: passed here
+                    icon={
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+                      </svg>
+                    }
+                  >
+                    <select 
+                      name="inquiryType"
+                      required
+                      value={formData.inquiryType}
+                      onChange={handleChange}
+                      className={`w-full bg-transparent outline-none text-base appearance-none cursor-pointer ${formData.inquiryType === "" ? "text-gray-400" : "text-gray-800"}`}
+                    >
+                      <option value="" disabled className="text-gray-400">{t.getInTouch.fields.type.placeholder}</option>
+                      {t.getInTouch.options.map((opt, i) => (
+                        <option key={i} value={opt} className="text-gray-800">{opt}</option>
+                      ))}
+                    </select>
+                  </InputWrapper>
+                  
+                  {/* Custom Animated Arrow for Select */}
+                  <div className={`absolute top-[42px] ${isAr ? "left-2" : "right-2"} pointer-events-none text-gray-400 group-focus-within:text-[#E88D15] transition-colors duration-300`}>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
-                  }
-                >
-                  <input 
-                    type="text" 
-                    placeholder={t.getInTouch.fields.company.placeholder}
-                    className="w-full bg-transparent outline-none text-base text-gray-800 placeholder-gray-300"
-                  />
-                </InputWrapper>
-              </div>
-
-              {/* Contact Type - Full Width Dropdown */}
-              <div className="relative">
-                <InputWrapper 
-                  label={t.getInTouch.fields.type.label}
-                  icon={
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  }
-                >
-                  <select className="w-full bg-transparent outline-none text-base text-gray-800 appearance-none cursor-pointer" defaultValue="">
-                    <option value="" disabled className="text-gray-400">{t.getInTouch.fields.type.placeholder}</option>
-                    {t.getInTouch.options.map((opt, i) => (
-                      <option key={i} value={opt} className="text-gray-800">{opt}</option>
-                    ))}
-                  </select>
-                </InputWrapper>
-                
-                {/* Custom Animated Arrow for Select */}
-                <div className={`absolute top-[42px] ${isAr ? "left-2" : "right-2"} pointer-events-none text-gray-400 group-focus-within:text-[#E88D15] transition-colors duration-300`}>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  </div>
                 </div>
               </div>
 
@@ -359,21 +431,50 @@ export default function ContactUnified({ lang = "en" }) {
                   {t.getInTouch.fields.message.label}
                 </label>
                 <textarea 
+                  name="message"
+                  required
+                  value={formData.message}
+                  onChange={handleChange}
                   rows={4}
                   placeholder={t.getInTouch.fields.message.placeholder}
                   className="w-full bg-transparent outline-none text-base text-gray-800 placeholder-gray-300 border-b border-gray-200 focus:border-[#E88D15] transition-colors duration-300 resize-none pb-3"
                 />
               </div>
 
+              {/* Success / Error Messages */}
+              {success && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 text-center rounded-xl text-sm font-medium">
+                  {t.getInTouch.success}
+                </div>
+              )}
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 text-center rounded-xl text-sm font-medium">
+                  {t.getInTouch.error}
+                </div>
+              )}
+
               {/* Submit Button */}
               <div className="w-full flex justify-center mt-2">
                 <motion.button 
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ y: loading ? 0 : -2 }}
+                  whileTap={{ scale: loading ? 1 : 0.98 }}
+                  disabled={loading}
                   type="submit"
-                  className="w-full md:w-auto bg-[#E88D15] hover:bg-[#d67e0f] text-white font-semibold text-base py-4 px-14 rounded-full shadow-[0_8px_20px_rgba(232,141,21,0.25)] transition-colors duration-300"
+                  className={`w-full md:w-auto flex items-center justify-center gap-3 text-white font-semibold text-base py-4 px-14 rounded-full transition-colors duration-300 ${
+                    loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#E88D15] hover:bg-[#d67e0f] shadow-[0_8px_20px_rgba(232,141,21,0.25)]"
+                  }`}
                 >
-                  {t.getInTouch.button}
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {t.getInTouch.loading}
+                    </>
+                  ) : (
+                    t.getInTouch.button
+                  )}
                 </motion.button>
               </div>
 

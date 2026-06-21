@@ -93,6 +93,11 @@ export const productBySlugQuery = `
   isAvailable,
   preparationTime,
   whatsappMessage,
+  seo{
+  metaTitle,
+  metaDescription,
+  keywords
+},
   "category": category->{
     name,
     "slug": slug.current
