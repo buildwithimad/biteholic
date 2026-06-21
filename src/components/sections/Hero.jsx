@@ -113,12 +113,12 @@ export default function Hero({ lang = "en" }) {
           className="absolute inset-0 w-full h-full object-cover"
         >
           <source 
-            src="https://res.cloudinary.com/duapi9qtk/video/upload/v1782023340/MobileHero_gptjon.webm" 
+            src="https://res.cloudinary.com/duapi9qtk/video/upload/v1782043876/HeroMobile_h5pnev.webm" 
             media="(max-width: 767px)" 
             type="video/webm" 
           />
           <source 
-            src="https://res.cloudinary.com/duapi9qtk/video/upload/v1782023562/DesktopHero_gw1mbg.webm" 
+            src="https://res.cloudinary.com/duapi9qtk/video/upload/v1782043708/HeroDesktop_olaahg.webm" 
             media="(min-width: 768px)" 
             type="video/webm" 
           />
@@ -144,12 +144,12 @@ export default function Hero({ lang = "en" }) {
             />
           </div>
 
-          <h1 className="text-3xl md:text-4xl lg:text-6xl font-semibold mb-3 tracking-wide">
+          {/* <h1 className="text-3xl md:text-4xl lg:text-6xl font-semibold mb-3 tracking-wide">
             {t.title}
           </h1>
           <p className="text-white text-sm md:text-base whitespace-pre-line max-w-2xl leading-relaxed">
             {t.subtitle}
-          </p>
+          </p> */}
           
           <div className="w-full max-w-[1200px] border-b border-[rgba(255,255,255,0.15)] mt-8" />
         </div>
