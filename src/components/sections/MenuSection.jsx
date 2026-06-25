@@ -2,141 +2,194 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import BurgerCard from "../cards/BurgerCard";
 
 // Inline dictionary for static translations
 const dict = {
   en: {
-    title: "Our Menu",
+    label: "Discover",
+    title: "Featured Menu",
+    description: "Handcrafted burgers made with premium ingredients. Taste the difference.",
+    viewFull: "View Full Menu",
     currency: "SAR",
+    categories: {
+      all: "All Items",
+      burgers: "Burgers",
+      sides: "Sides",
+      drinks: "Drinks",
+      desserts: "Desserts"
+    }
   },
   ar: {
-    title: "القائمة لدينا",
+    label: "اكتشف",
+    title: "القائمة المميزة",
+    description: "برجر مصنوع يدويًا من مكونات فاخرة. تذوق الفرق.",
+    viewFull: "عرض القائمة الكاملة",
     currency: "ر.س",
+    categories: {
+      all: "كل العناصر",
+      burgers: "برجر",
+      sides: "مقبلات",
+      drinks: "مشروبات",
+      desserts: "حلويات"
+    }
   }
 };
-
-// OPTIMIZATION: Isolated Card Component.
-// Moving state here prevents the entire grid from re-rendering when one item is clicked.
-// This dramatically improves INP (Interaction to Next Paint).
-function ProductCard({ product, lang, t, isAr }) {
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Safely extract the image URL
-  const imageUrl = product?.mainImage?.asset?.url || "/placeholder.png"; 
-  const productSlug = product.slug?.current || product.slug;
-  
-  // Determine active pricing
-  const hasDiscount = product.isOnSale && product.discountPrice;
-  const currentPrice = hasDiscount ? product.discountPrice : product.price;
-  const oldPrice = hasDiscount ? product.price : null;
-
-  return (
-    <Link
-      href={`/${lang}/menu/${productSlug}`} 
-      onClick={() => setIsLoading(true)}
-      prefetch={false} // OPTIMIZATION: Prevents eager fetching of all links on scroll, saving LCP bandwidth. (Still prefetches on hover!)
-      className="group flex flex-col bg-transparent p-2 md:p-3 hover:bg-white rounded-2xl transition-all duration-300 ease-in-out cursor-pointer"
-    >
-      {/* Product Image */}
-      <div className="relative w-full aspect-square mb-4 overflow-hidden rounded-xl bg-gray-100 flex-shrink-0">
-        <Image
-          src={imageUrl}
-          alt={product.name || "Product"}
-          fill
-          quality={80} // OPTIMIZATION: explicitly set quality to save KB while maintaining crispness
-          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
-        />
-        
-        {/* Calorie / Custom Badge */}
-        {product.badge && (
-          <div className="absolute top-2 start-2 bg-[#E88D15] text-white text-[10px] md:text-xs font-bold px-2.5 py-1 rounded-full shadow-sm z-10">
-            {product.badge}
-          </div>
-        )}
-      </div>
-
-      {/* Details Container */}
-      <div className="flex flex-col flex-grow justify-between px-1">
-        {/* Product Name */}
-        <h3 className="text-gray-900 font-bold text-sm md:text-base line-clamp-2 leading-snug mb-2">
-          {product.name}
-        </h3>
-
-        {/* Price & Action */}
-        <div className="flex items-end justify-between mt-auto">
-          <div className="flex flex-col">
-            {oldPrice && (
-              <span className="text-gray-400 line-through text-[10px] md:text-xs mb-0.5">
-                {oldPrice} {t.currency}
-              </span>
-            )}
-            <span className="text-[#E88D15] font-black text-base md:text-lg leading-none">
-              {currentPrice} <span className="text-[10px] md:text-xs font-bold text-gray-900 ml-0.5">{t.currency}</span>
-            </span>
-          </div>
-
-          {/* Action Indicator (Arrow or Spinner) */}
-          <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-[#E88D15] group-hover:text-white text-gray-500 transition-colors duration-300 flex-shrink-0">
-            {isLoading ? (
-              <svg className="w-4 h-4 md:w-5 md:h-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : (
-              <svg 
-                className={`w-3.5 h-3.5 md:w-4 md:h-4 transition-transform duration-300 ${isAr ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-              </svg>
-            )}
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
 
 export default function HomeMenuSection({ products = [], lang = "en" }) {
   const isAr = lang === "ar";
   const t = dict[lang] || dict.en;
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Extract unique categories from products
+  const categories = ["all", ...new Set(products.map(p => p.category?.toLowerCase() || "uncategorized").filter(Boolean))];
+  
+  // Filter products by active category
+  const filteredProducts = activeCategory === "all" 
+    ? products 
+    : products.filter(p => (p.category?.toLowerCase() || "") === activeCategory);
+
+  // Handle horizontal scroll for mobile category tabs
+  const scrollTabs = (direction) => {
+    const container = document.getElementById("category-tabs");
+    if (container) {
+      const scrollAmount = direction === "left" ? -200 : 200;
+      container.scrollBy({ left: isAr ? -scrollAmount : scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  // Detect scroll for shadow effect on tabs
+  useEffect(() => {
+    const handleScroll = () => {
+      const container = document.getElementById("category-tabs");
+      if (container) {
+        setIsScrolled(container.scrollLeft > 10);
+      }
+    };
+
+    const container = document.getElementById("category-tabs");
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
+    }
+  }, [isAr]);
 
   if (!products || products.length === 0) return null;
 
   return (
-    <section dir={isAr ? "rtl" : "ltr"} className="w-full bg-[#fcf9f0] py-16 px-6">
-      <div className="max-w-[1200px] mx-auto">
+    <section dir={isAr ? "rtl" : "ltr"} className="w-full bg-[#fcf9f0] py-20 px-6 overflow-hidden">
+      <div className="max-w-[1400px] mx-auto">
         
-        {/* HEADER */}
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl md:text-4xl font-extrabold text-gray-900 tracking-wide">
+        {/* HEADER SECTION */}
+        <div className="text-center mb-12 max-w-3xl mx-auto">
+          {/* Accent Label */}
+          <span className="inline-block text-[#E88D15] font-bold text-xs md:text-sm uppercase tracking-[0.2em] mb-4">
+            {t.label}
+          </span>
+          
+          {/* Main Title */}
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#050505] tracking-tight leading-[1.1] mb-6">
             {t.title}
           </h2>
-          {/* Optional: Link to full menu */}
+          
+          {/* Description */}
+          <p className="text-gray-600 text-base md:text-lg leading-relaxed max-w-xl mx-auto">
+            {t.description}
+          </p>
+        </div>
+
+        {/* CATEGORY TABS */}
+        <div className="relative mb-12">
+          {/* Left Shadow Gradient */}
+          {isScrolled && (
+            <div className={`absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r ${isAr ? 'from-[#fcf9f0] to-transparent' : 'from-[#fcf9f0] to-transparent'} z-10 pointer-events-none`} />
+          )}
+          
+          {/* Right Shadow Gradient */}
+          <div className={`absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l ${isAr ? 'from-[#fcf9f0] to-transparent' : 'from-[#fcf9f0] to-transparent'} z-10 pointer-events-none hidden md:block`} />
+
+          {/* Scroll Buttons (Desktop) */}
+          <button 
+            onClick={() => scrollTabs("left")}
+            className={`absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-700 hover:text-[#E88D15] transition-colors z-20 hidden md:flex ${isAr ? 'right-2 left-auto' : ''}`}
+          >
+            <svg className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button 
+            onClick={() => scrollTabs("right")}
+            className={`absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-700 hover:text-[#E88D15] transition-colors z-20 hidden md:flex ${isAr ? 'left-2 right-auto' : ''}`}
+          >
+            <svg className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          {/* Category Pills Container */}
+          <div 
+            id="category-tabs"
+            className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth pb-2 px-2 md:px-0"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {categories.map((category) => {
+              const isActive = activeCategory === category;
+              const categoryKey = category === "all" ? "all" : category;
+              const label = t.categories[categoryKey] || category.charAt(0).toUpperCase() + category.slice(1);
+              
+              return (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`flex-shrink-0 px-6 py-3 rounded-full font-semibold text-sm md:text-base transition-all duration-300 ease-out whitespace-nowrap ${
+                    isActive
+                      ? "bg-[#E88D15] text-white shadow-lg shadow-orange-500/30 scale-105"
+                      : "bg-white text-gray-700 hover:bg-gray-100 shadow-md hover:shadow-lg"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* PRODUCTS GRID */}
+        {filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mb-16">
+            {filteredProducts.map((product) => (
+              <BurgerCard 
+                key={product._id} 
+                product={product} 
+                lang={lang} 
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20">
+            <p className="text-gray-500 text-lg">No products found in this category.</p>
+          </div>
+        )}
+
+        {/* VIEW FULL MENU CTA */}
+        <div className="text-center">
           <Link 
             href={`/${lang}/menu`} 
             prefetch={false}
-            className="text-sm font-semibold text-[#E88D15] hover:text-gray-900 transition-colors duration-300"
+            className="inline-flex items-center gap-3 bg-[#E88D15] text-white font-bold text-lg px-10 py-5 rounded-2xl shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 hover:-translate-y-1 transition-all duration-300 group"
           >
-            {isAr ? "عرض الكل ←" : "View All →"}
+            <span>{t.viewFull}</span>
+            <svg 
+              className={`w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 ${isAr ? 'rotate-180 group-hover:translate-x-0 group-hover:-translate-x-1' : ''}`} 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
           </Link>
-        </div>
-
-        {/* GRID */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-          {products.map((product) => (
-            <ProductCard 
-              key={product._id} 
-              product={product} 
-              lang={lang} 
-              t={t} 
-              isAr={isAr} 
-            />
-          ))}
         </div>
 
       </div>

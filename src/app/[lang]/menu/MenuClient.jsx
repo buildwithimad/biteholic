@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useCallback, useTransition } from "react";
+import { useState, useCallback, useTransition, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Animate from "@/components/animation/Animate";
 import BurgerCard from "@/components/cards/BurgerCard";
+import CategoryNav from "@/components/menu/CategoryNav";
+import CategorySection from "@/components/menu/CategorySection";
 
 // UI Dictionary
 const uiText = {
@@ -70,11 +72,41 @@ export default function MenuClient({ lang = "en", categories = [], items = [], t
 
   const [isPending, startTransition] = useTransition();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [groupedProducts, setGroupedProducts] = useState({});
 
   const currentCategory = searchParams.get("category") || "all";
   const currentSort = searchParams.get("sort") || "featured";
   const currentOffers = searchParams.get("offers") === "true";
   const currentSearch = searchParams.get("search") || "";
+
+  // Group products by category when items or filters change
+  useEffect(() => {
+    if (!items || items.length === 0) {
+      setGroupedProducts({});
+      return;
+    }
+
+    const grouped = items.reduce((acc, product) => {
+      const categoryName = typeof product?.category === 'object' 
+        ? product.category?.name 
+        : (product?.category || 'Other');
+      const categorySlug = typeof product?.category === 'object' 
+        ? product.category?.slug?.current || product.category?.slug 
+        : 'other';
+      
+      if (!acc[categorySlug]) {
+        acc[categorySlug] = {
+          name: categoryName,
+          slug: categorySlug,
+          products: []
+        };
+      }
+      acc[categorySlug].products.push(product);
+      return acc;
+    }, {});
+
+    setGroupedProducts(grouped);
+  }, [items]);
 
   const createQueryString = useCallback((name, value) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -83,6 +115,12 @@ export default function MenuClient({ lang = "en", categories = [], items = [], t
     else params.delete(name);
     return params.toString();
   }, [searchParams]);
+
+  const handleCategoryClick = (slug) => {
+    startTransition(() => {
+      router.push(pathname + "?" + createQueryString("category", slug === "all" ? "" : slug), { scroll: false });
+    });
+  };
 
   const updateFilter = (key, value) => {
     startTransition(() => {
@@ -243,7 +281,7 @@ export default function MenuClient({ lang = "en", categories = [], items = [], t
           </aside>
 
           {/* ======================================= */}
-          {/* PRODUCT GRID & PAGINATION               */}
+          {/* CATEGORY NAV & PRODUCT SECTIONS         */}
           {/* ======================================= */}
           <div className="flex-1 flex flex-col relative z-20 w-full">
             {isPending ? (
@@ -254,15 +292,32 @@ export default function MenuClient({ lang = "en", categories = [], items = [], t
               </div>
             ) : items.length > 0 ? (
               <>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5 lg:gap-6 mb-12">
-                  {items.map((product, index) => (
-                    <Animate key={product._id} opacity={0} delay={index * 0.03} className="h-full">
-                      <BurgerCard product={product} lang={lang} t={ui} />
-                    </Animate>
+                {/* Sticky Category Navigation */}
+                <CategoryNav 
+                  categories={categories} 
+                  activeCategory={currentCategory}
+                  onCategoryClick={handleCategoryClick}
+                  lang={lang}
+                />
+
+                {/* Category Sections */}
+                <div className="flex flex-col gap-16">
+                  {Object.entries(groupedProducts).map(([slug, categoryData]) => (
+                    <CategorySection
+                      key={slug}
+                      category={{
+                        slug,
+                        name: categoryData.name,
+                        description: categoryData.description || ''
+                      }}
+                      products={categoryData.products}
+                      lang={lang}
+                      ui={ui}
+                    />
                   ))}
                 </div>
                 
-                {/* Pagination */}
+                {/* Pagination - only show if we have multiple pages */}
                 {totalPages > 1 && (
                   <div className="w-full flex items-center justify-center gap-2 mt-8 border-t border-gray-100 pt-8">
                     <button 
